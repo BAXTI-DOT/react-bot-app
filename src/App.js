@@ -1,25 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+const App = () => {
+  const [ requests, setRequests ] = useState([])
+  const [ state, setState ] = useState(0)
+
+  useEffect(() => {
+    fetch('https://bot-n37.herokuapp.com/requests')
+    .then(res => res.json())
+    .then(data => setRequests(data))
+  }, [requests])
+
+  const handleSubmit = e => {
+    const { name, price, description } = e.target
+
+    e.preventDefault();
+    fetch('https://bot-n37.herokuapp.com/newCourse', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: name.value,
+          price: price.value,
+          description: description.value,
+        })
+      }
+    )
+    .then(res => res.json())
+    .then(data => setState(state + 1))
+  }
+
+  return (<>
+    <form onSubmit={handleSubmit}>
+      <input type={"text"} placeholder="name" name="name" />
+      <input type={"text"} placeholder="price" name="price" />
+      <input type={"text"} placeholder="desc" name="description" />
+      <button type="submit">Send</button>
+    </form>
+    <ul>
+      {
+        requests && requests.map((e, i) => (
+          <li key={i}>
+            <h5>{e.name}</h5>
+            <h5>{e.course}</h5>
+            <a href={`tel:${e.contact}`}>{e.contact}</a>
+          </li>
+        ))
+      }
+    </ul>
+  </>)
 }
 
 export default App;
